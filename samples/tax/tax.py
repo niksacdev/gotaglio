@@ -109,11 +109,7 @@ def stages(name, config, registry):
                 raise ValueError(f"Response was only code fences, no content")
 
             try:
-                data = json.loads(text)
-                # Auto-correct rate if LLM returned percentage instead of decimal
-                if data.get("rate") is not None and data["rate"] > 1:
-                    data["rate"] = data["rate"] / 100
-                return data
+                return json.loads(text)
             except json.JSONDecodeError as e:
                 # Show what we tried to parse
                 preview = text[:200] + "..." if len(text) > 200 else text
