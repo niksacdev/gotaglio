@@ -178,13 +178,14 @@ def taxable_cell(result: dict[str, Any], turn_index: int):
 
 
 def rate_cell(result: dict[str, Any], turn_index: int):
-    """Show rate result in summary."""
+    """Show rate result in summary (raw value from LLM)."""
     extracted = glom(get_stages(result, turn_index), "extract.rate", default=None)
 
     if extracted is None:
         return Text("-")
 
-    return Text(f"{extracted:.2%}")
+    # Show raw value - if LLM returns 6.25 instead of 0.0625, you'll see it
+    return Text(f"{extracted}")
 
 
 def question_cell(result, turn_index):
