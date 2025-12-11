@@ -41,7 +41,7 @@ Always respond with a JSON object:
 ```json
 {
   "taxable": boolean,
-  "rate": number | null,
+  "rate": number | null,  // IMPORTANT: Use decimal format (0.0625 not 6.25 for 6.25%)
   "reasoning": "Clear explanation of the determination",
   "citation": "Relevant statute, regulation, or ruling",
   "confidence": "high" | "medium" | "low",
