@@ -1,0 +1,224 @@
+# US Indirect Tax Q&A Dataset
+# Format: GoTaglio pipeline compatible (uses turns structure)
+#
+# Each case has:
+#   - uuid: Unique identifier
+#   - keywords: For filtering/searching
+#   - complexity: basic | intermediate | advanced | strategic
+#   - turns: Array of user questions with expected JSON responses
+
+# ==============================================================================
+# SOFTWARE & DIGITAL GOODS
+# ==============================================================================
+
+- uuid: a1b2c3d4-0001-4000-8000-000000000001
+  keywords: [software, saas, texas]
+  complexity: intermediate
+  turns:
+    - user: "Is cloud-based helpdesk software (SaaS) taxable in Texas?"
+      expected:
+        taxable: true
+        rate: 0.0625
+        reasoning: "Texas taxes data processing services, which includes SaaS. State rate is 6.25%."
+        citation: "Tex. Tax Code § 151.0101(a)(14); 34 TAC § 3.330"
+        confidence: "high"
+
+- uuid: a1b2c3d4-0002-4000-8000-000000000002
+  keywords: [software, saas, california]
+  complexity: basic
+  turns:
+    - user: "Is cloud-based helpdesk software (SaaS) taxable in California?"
+      expected:
+        taxable: false
+        rate: null
+        reasoning: "California does not tax SaaS or cloud-based software. Only tangible personal property is taxable."
+        citation: "Cal. Rev. & Tax. Code § 6006(a)"
+        confidence: "high"
+
+- uuid: a1b2c3d4-0003-4000-8000-000000000003
+  keywords: [software, prewritten, new_york, physical]
+  complexity: basic
+  turns:
+    - user: "Is prewritten office software sold on CD taxable in New York?"
+      expected:
+        taxable: true
+        rate: 0.04
+        reasoning: "New York taxes prewritten software delivered on tangible media. State rate is 4%."
+        citation: "N.Y. Tax Law § 1101(b)(6)"
+        confidence: "high"
+
+- uuid: a1b2c3d4-0004-4000-8000-000000000004
+  keywords: [software, custom, new_york]
+  complexity: intermediate
+  turns:
+    - user: "Is custom-developed software taxable in New York?"
+      expected:
+        taxable: false
+        rate: null
+        reasoning: "Custom software developed for a specific customer is not taxable in New York."
+        citation: "N.Y. Tax Law § 1101(b)(14)"
+        confidence: "high"
+
+# ==============================================================================
+# FOOD & GROCERIES
+# ==============================================================================
+
+- uuid: b1b2c3d4-0001-4000-8000-000000000001
+  keywords: [food, grocery, texas]
+  complexity: basic
+  turns:
+    - user: "Are groceries taxable in Texas?"
+      expected:
+        taxable: false
+        rate: null
+        reasoning: "Most food items for home consumption are exempt from Texas sales tax."
+        citation: "Tex. Tax Code § 151.314"
+        confidence: "high"
+
+- uuid: b1b2c3d4-0002-4000-8000-000000000002
+  keywords: [food, prepared, texas]
+  complexity: intermediate
+  turns:
+    - user: "Are prepared foods from a deli counter taxable in Texas?"
+      expected:
+        taxable: true
+        rate: 0.0625
+        reasoning: "Prepared food sold for immediate consumption is taxable in Texas."
+        citation: "Tex. Tax Code § 151.314(c)"
+        confidence: "high"
+
+- uuid: b1b2c3d4-0003-4000-8000-000000000003
+  keywords: [food, candy, new_york]
+  complexity: intermediate
+  turns:
+    - user: "Is candy taxable in New York?"
+      expected:
+        taxable: true
+        rate: 0.04
+        reasoning: "Candy is specifically excluded from the grocery exemption in New York."
+        citation: "N.Y. Tax Law § 1115(a)(1)"
+        confidence: "high"
+
+# ==============================================================================
+# MANUFACTURING EQUIPMENT
+# ==============================================================================
+
+- uuid: c1b2c3d4-0001-4000-8000-000000000001
+  keywords: [manufacturing, equipment, exemption, texas]
+  complexity: intermediate
+  turns:
+    - user: "Is manufacturing equipment taxable in Texas?"
+      expected:
+        taxable: false
+        rate: null
+        reasoning: "Texas exempts manufacturing machinery and equipment used directly in manufacturing."
+        citation: "Tex. Tax Code § 151.318"
+        confidence: "medium"
+
+- uuid: c1b2c3d4-0002-4000-8000-000000000002
+  keywords: [manufacturing, equipment, ohio]
+  complexity: intermediate
+  turns:
+    - user: "Is manufacturing equipment taxable in Ohio?"
+      expected:
+        taxable: false
+        rate: null
+        reasoning: "Ohio exempts equipment used primarily in manufacturing operations."
+        citation: "Ohio Rev. Code § 5739.011"
+        confidence: "high"
+
+# ==============================================================================
+# MEDICAL & HEALTHCARE
+# ==============================================================================
+
+- uuid: d1b2c3d4-0001-4000-8000-000000000001
+  keywords: [medical, prescription, drugs]
+  complexity: basic
+  turns:
+    - user: "Are prescription drugs taxable in Texas?"
+      expected:
+        taxable: false
+        rate: null
+        reasoning: "Prescription medications are exempt from Texas sales tax."
+        citation: "Tex. Tax Code § 151.313"
+        confidence: "high"
+
+- uuid: d1b2c3d4-0002-4000-8000-000000000002
+  keywords: [medical, equipment, dme]
+  complexity: intermediate
+  turns:
+    - user: "Is durable medical equipment taxable in Texas?"
+      expected:
+        taxable: false
+        rate: null
+        reasoning: "Durable medical equipment prescribed by a physician is exempt in Texas."
+        citation: "Tex. Tax Code § 151.313"
+        confidence: "medium"
+
+# ==============================================================================
+# PROFESSIONAL SERVICES
+# ==============================================================================
+
+- uuid: e1b2c3d4-0001-4000-8000-000000000001
+  keywords: [services, legal, texas]
+  complexity: basic
+  turns:
+    - user: "Are legal services taxable in Texas?"
+      expected:
+        taxable: false
+        rate: null
+        reasoning: "Professional services including legal services are not taxable in Texas."
+        citation: "Tex. Tax Code § 151.0101"
+        confidence: "high"
+
+- uuid: e1b2c3d4-0002-4000-8000-000000000002
+  keywords: [services, data_processing, texas]
+  complexity: intermediate
+  turns:
+    - user: "Are data processing services taxable in Texas?"
+      expected:
+        taxable: true
+        rate: 0.0625
+        reasoning: "Data processing services are specifically enumerated as taxable in Texas."
+        citation: "Tex. Tax Code § 151.0101(a)(14)"
+        confidence: "high"
+
+# ==============================================================================
+# COMPLEX SCENARIOS
+# ==============================================================================
+
+- uuid: f1b2c3d4-0001-4000-8000-000000000001
+  keywords: [bundled, software, services, texas]
+  complexity: advanced
+  turns:
+    - user: "A software company sells SaaS bundled with implementation consulting for a single price. How is this taxed in Texas?"
+      expected:
+        taxable: true
+        rate: 0.0625
+        reasoning: "When taxable and non-taxable items are sold for a single price in Texas, the entire amount is taxable unless separately stated."
+        citation: "34 TAC § 3.303"
+        confidence: "medium"
+
+- uuid: f1b2c3d4-0002-4000-8000-000000000002
+  keywords: [drop_ship, nexus, multistate]
+  complexity: advanced
+  turns:
+    - user: "A California seller drop ships products from a Texas warehouse to a Texas customer. Who collects Texas sales tax?"
+      expected:
+        taxable: true
+        rate: 0.0625
+        reasoning: "The Texas warehouse creates nexus. Either the seller or warehouse may be responsible for collecting Texas sales tax."
+        citation: "Tex. Tax Code § 151.107"
+        confidence: "medium"
+
+- uuid: f1b2c3d4-0003-4000-8000-000000000003
+  keywords: [exemption_certificate, resale]
+  complexity: intermediate
+  turns:
+    - user: "Can a retailer accept a resale certificate from an out-of-state buyer in Texas?"
+      expected:
+        taxable: false
+        rate: null
+        reasoning: "Texas accepts resale certificates from out-of-state buyers if the item is for resale."
+        citation: "Tex. Tax Code § 151.307"
+        confidence: "high"

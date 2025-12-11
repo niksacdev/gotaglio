@@ -1,5 +1,29 @@
 [
   {
+    "name": "niksac-gpt-4.1",
+    "description": "GPT-4.1",
+    "type": "AZURE_OPEN_AI",
+    "endpoint": "https://niksac-agent-resource.openai.azure.com/",
+    "deployment": "niksac-gpt-4.1",
+    "api": "2024-05-01-preview",
+    "key": "From .credentials.json",
+    "temperature": 0.7,
+    "max_completion_tokens": 1000
+  },
+  {
+    "name": "gpt-5-mini",
+    "description": "GPT-5 Mini (restricted params)",
+    "type": "AZURE_OPEN_AI",
+    "endpoint": "https://niksac-agent-resource.openai.azure.com/",
+    "deployment": "gpt-5-mini",
+    "api": "2024-05-01-preview",
+    "key": "From .credentials.json",
+    "temperature": null,
+    "top_p": null,
+    "frequency_penalty": null,
+    "presence_penalty": null
+  },
+  {
     "name": "phi3",
     "description": "Phi-3 medium 128k",
     "type": "AZURE_AI",

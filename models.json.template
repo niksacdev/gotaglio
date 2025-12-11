@@ -3,25 +3,54 @@
     "name": "phi3",
     "description": "Phi-3 medium 128k",
     "type": "AZURE_AI",
-    "endpoint": <ENDPOINT>,
+    "endpoint": "<ENDPOINT>",
     "key": "From .credentials.json"
   },
   {
     "name": "gpt3.5",
-    "description": "GPT-3.5-turbo 16k",
+    "description": "GPT-3.5-turbo 16k (uses legacy max_tokens)",
     "type": "AZURE_OPEN_AI",
-    "endpoint": <ENDPOINT>,
+    "endpoint": "<ENDPOINT>",
     "deployment": "gpt-35-turbo-16k-0613",
     "key": "From .credentials.json",
-    "api": "2024-07-01-preview"
+    "api": "2024-07-01-preview",
+    "max_tokens": 800,
+    "max_completion_tokens": null
   },
   {
     "name": "gpt4o",
-    "description": "gpt-4o-2024-11-20",
+    "description": "gpt-4o-2024-11-20 (default settings)",
     "type": "AZURE_OPEN_AI",
-    "endpoint": <ENDPOINT>,
+    "endpoint": "<ENDPOINT>",
     "deployment": "gpt-4o-2024-11-20",
     "key": "From .credentials.json",
     "api": "2024-08-01-preview"
+  },
+  {
+    "name": "gpt4o-custom",
+    "description": "gpt-4o with custom settings (example)",
+    "type": "AZURE_OPEN_AI",
+    "endpoint": "<ENDPOINT>",
+    "deployment": "gpt-4o-2024-11-20",
+    "key": "From .credentials.json",
+    "api": "2024-08-01-preview",
+    "max_completion_tokens": 1000,
+    "temperature": 0.5,
+    "top_p": 0.9,
+    "frequency_penalty": 0.1,
+    "presence_penalty": 0.1
+  },
+  {
+    "name": "restricted-model",
+    "description": "Model that doesn't support temperature (example)",
+    "type": "AZURE_OPEN_AI",
+    "endpoint": "<ENDPOINT>",
+    "deployment": "restricted-deployment",
+    "key": "From .credentials.json",
+    "api": "2024-05-01-preview",
+    "temperature": null,
+    "top_p": null,
+    "frequency_penalty": null,
+    "presence_penalty": null
   }
 ]

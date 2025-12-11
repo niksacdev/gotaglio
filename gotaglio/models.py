@@ -1,10 +1,68 @@
 from abc import ABC, abstractmethod
+import logging
+import time
 from typing import Any, cast
+
+from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 from .constants import app_configuration
 from .exceptions import ExceptionContext
 from .lazy_imports import azure_ai_inference, azure_core_credentials, openai
 from .shared import read_data_file
+
+
+class ModelSettings(BaseModel):
+    """Settings for model inference requests.
+
+    Default values work for most OpenAI models. Set to None to disable
+    a parameter for models that don't support it.
+    """
+    max_completion_tokens: int = Field(default=800, ge=1, le=128000)
+    max_tokens: int | None = Field(default=None, ge=1, le=128000)
+    temperature: float | None = Field(default=0.7, ge=0.0, le=2.0)
+    top_p: float | None = Field(default=0.95, ge=0.0, le=1.0)
+    frequency_penalty: float | None = Field(default=0.0, ge=-2.0, le=2.0)
+    presence_penalty: float | None = Field(default=0.0, ge=-2.0, le=2.0)
+
+    @classmethod
+    def from_config(cls, config: dict) -> "ModelSettings":
+        """Extract settings from model configuration.
+
+        Uses defaults unless explicitly set in config.
+        Set a value to null in JSON to disable that parameter.
+        """
+        # Extract only the settings fields from config
+        settings_fields = {
+            k: v for k, v in config.items()
+            if k in cls.model_fields
+        }
+        return cls(**settings_fields)
+
+    def to_api_params(self) -> dict:
+        """Convert to API parameters, excluding None values."""
+        params = {}
+
+        # Handle token limit - prefer max_completion_tokens for newer models
+        if self.max_completion_tokens is not None:
+            params["max_completion_tokens"] = self.max_completion_tokens
+        elif self.max_tokens is not None:
+            params["max_tokens"] = self.max_tokens
+        else:
+            params["max_completion_tokens"] = 800  # sensible default
+
+        # Add optional parameters only if set
+        if self.temperature is not None:
+            params["temperature"] = self.temperature
+        if self.top_p is not None:
+            params["top_p"] = self.top_p
+        if self.frequency_penalty is not None:
+            params["frequency_penalty"] = self.frequency_penalty
+        if self.presence_penalty is not None:
+            params["presence_penalty"] = self.presence_penalty
+
+        return params
 
 
 class Model(ABC):
@@ -48,33 +106,63 @@ class AzureAI(Model):
 class AzureOpenAI(Model):
     def __init__(self, registry, configuration):
         self._config = configuration
+        self._settings = ModelSettings.from_config(configuration)
         self._client = None
         registry.register_model(configuration["name"], self)
 
     async def infer(self, messages, context=None):
         if not self._client:
-            endpoint = self._config["endpoint"]
-            key = self._config["key"]
-            api = self._config["api"]
             self._client = openai.AzureOpenAI(
-                api_key=key,
-                api_version=api,
-                azure_endpoint=endpoint,
+                api_key=self._config["key"],
+                api_version=self._config["api"],
+                azure_endpoint=self._config["endpoint"],
             )
 
-        response = self._client.chat.completions.create(
-            model=self._config["deployment"],
-            messages=messages,
-            max_tokens=800,
-            temperature=0.7,
-            top_p=0.95,
-            frequency_penalty=0,
-            presence_penalty=0,
-            stop=None,
-            stream=False,
-        )
+        params = {
+            "model": self._config["deployment"],
+            "messages": messages,
+            **self._settings.to_api_params(),
+        }
 
-        return response.choices[0].message.content
+        # Retry logic for transient failures and empty responses
+        max_retries = 3
+
+        for attempt in range(max_retries):
+            try:
+                response = self._client.chat.completions.create(**params)
+
+                # Check for empty response
+                if not response.choices:
+                    if attempt < max_retries - 1:
+                        logger.warning(f"Attempt {attempt + 1}: No choices returned. Retrying...")
+                        time.sleep((attempt + 1) * 2)
+                        continue
+                    raise ValueError(f"API returned no choices after {max_retries} attempts")
+
+                content = response.choices[0].message.content
+
+                # Check for None/empty content
+                if content is None or content.strip() == "":
+                    finish_reason = response.choices[0].finish_reason
+                    if attempt < max_retries - 1:
+                        logger.warning(f"Attempt {attempt + 1}: Empty content (finish_reason={finish_reason}). Retrying...")
+                        time.sleep((attempt + 1) * 2)
+                        continue
+                    raise ValueError(
+                        f"API returned empty content after {max_retries} attempts. "
+                        f"finish_reason={finish_reason}"
+                    )
+
+                return content
+
+            except ValueError:
+                raise  # Don't retry our own ValueErrors after max retries
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    logger.warning(f"Attempt {attempt + 1} failed: {e}. Retrying...")
+                    time.sleep((attempt + 1) * 2)
+                else:
+                    raise
 
     def metadata(self):
         return {k: v for k, v in self._config.items() if k != "key"}
