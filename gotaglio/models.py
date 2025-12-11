@@ -1,11 +1,7 @@
 from abc import ABC, abstractmethod
-import logging
-import time
 from typing import Any, cast
 
 from pydantic import BaseModel, Field
-
-logger = logging.getLogger(__name__)
 
 from .constants import app_configuration
 from .exceptions import ExceptionContext
@@ -118,51 +114,13 @@ class AzureOpenAI(Model):
                 azure_endpoint=self._config["endpoint"],
             )
 
-        params = {
-            "model": self._config["deployment"],
-            "messages": messages,
+        response = self._client.chat.completions.create(
+            model=self._config["deployment"],
+            messages=messages,
             **self._settings.to_api_params(),
-        }
+        )
 
-        # Retry logic for transient failures and empty responses
-        max_retries = 3
-
-        for attempt in range(max_retries):
-            try:
-                response = self._client.chat.completions.create(**params)
-
-                # Check for empty response
-                if not response.choices:
-                    if attempt < max_retries - 1:
-                        logger.warning(f"Attempt {attempt + 1}: No choices returned. Retrying...")
-                        time.sleep((attempt + 1) * 2)
-                        continue
-                    raise ValueError(f"API returned no choices after {max_retries} attempts")
-
-                content = response.choices[0].message.content
-
-                # Check for None/empty content
-                if content is None or content.strip() == "":
-                    finish_reason = response.choices[0].finish_reason
-                    if attempt < max_retries - 1:
-                        logger.warning(f"Attempt {attempt + 1}: Empty content (finish_reason={finish_reason}). Retrying...")
-                        time.sleep((attempt + 1) * 2)
-                        continue
-                    raise ValueError(
-                        f"API returned empty content after {max_retries} attempts. "
-                        f"finish_reason={finish_reason}"
-                    )
-
-                return content
-
-            except ValueError:
-                raise  # Don't retry our own ValueErrors after max retries
-            except Exception as e:
-                if attempt < max_retries - 1:
-                    logger.warning(f"Attempt {attempt + 1} failed: {e}. Retrying...")
-                    time.sleep((attempt + 1) * 2)
-                else:
-                    raise
+        return cast(str, response.choices[0].message.content)
 
     def metadata(self):
         return {k: v for k, v in self._config.items() if k != "key"}
